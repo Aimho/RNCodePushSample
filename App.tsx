@@ -8,8 +8,9 @@
  * @format
  */
 
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
+  AppState,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -18,6 +19,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import CodePush from 'react-native-code-push';
 
 import {
   Colors,
@@ -62,6 +64,27 @@ const App = () => {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const codePushSync = () => {
+    CodePush.sync({
+      // 업데이트 다이얼로그 설정
+      updateDialog: {
+        title: '새로운 업데이트가 존재합니다.',
+        optionalUpdateMessage: '지금 업데이트하시겠습니까?',
+        optionalIgnoreButtonLabel: '나중에',
+        optionalInstallButtonLabel: '지금',
+      },
+      installMode: CodePush.InstallMode.IMMEDIATE,
+    });
+  };
+
+  useEffect(() => {
+    codePushSync();
+    // 앱 켜졌을 때마다 codePushSync() 실행해서 업데이트 체크
+    AppState.addEventListener('change', state => {
+      state === 'active' && codePushSync();
+    });
+  }, []);
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
@@ -73,10 +96,7 @@ const App = () => {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
+          <Section title="Step One">Change Code Push Android v3</Section>
           <Section title="See Your Changes">
             <ReloadInstructions />
           </Section>
